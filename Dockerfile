@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
 		git \
         gnupg \
+        python3 \
+        python3-pip \
 		sudo \ 
         texlive-base \
         texlive-bibtex-extra \
@@ -44,14 +46,15 @@ RUN git clone https://github.com/feekosta/JSONSchemaDiscovery
 WORKDIR /home/kali/JSONSchemaDiscovery
 
 #copy patches. and relevant files
-COPY --chown=kali:kali ./karma.patch .
-COPY --chown=kali:kali ./package.patch .
+COPY --chown=kali:kali ./doAll.sh .
 COPY --chown=kali:kali ./makefile .
-COPY --chown=kali:kali ./smoke.sh .
+COPY --chown=kali:kali ./csv csv
+COPY --chown=kali:kali ./patches patches
+COPY --chown=kali:kali ./script script
 
 #run patches
-RUN  patch karma.conf.js karma.patch
-RUN  patch package.json package.patch
+RUN  patch karma.conf.js ./patches/karma.patch
+RUN  patch package.json ./patches/package.patch
 
 #install global dependencies
 RUN npm install -g @angular/cli@13.3.11 && \
@@ -65,10 +68,10 @@ RUN git clone https://github.com/kalino7/ReproEngReport
 #clone datasets for experiment
 RUN git clone https://github.com/kalino7/datasets
 
-#make smoke.sh executeable
-RUN chmod +x smoke.sh
+# install python libraries
+RUN pip install pymongo python-dotenv requests
 
-#Build pdf report
-RUN make report
+#make doAll.sh executeable
+RUN chmod +x doAll.sh
 
 EXPOSE 4200
